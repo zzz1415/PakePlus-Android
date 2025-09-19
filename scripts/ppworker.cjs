@@ -1,9 +1,9 @@
 const fs = require('fs-extra')
 const path = require('path')
+const { execSync } = require('child_process')
 const ppconfig = require('./ppconfig.json')
-import { execSync } from 'child_process'
 
-function generateAdaptiveIcons(input, output, options = {}) {
+function generateAdaptiveIcons(input, output) {
     const densities = {
         'mipmap-mdpi': 48,
         'mipmap-hdpi': 72,
@@ -11,8 +11,11 @@ function generateAdaptiveIcons(input, output, options = {}) {
         'mipmap-xxhdpi': 144,
         'mipmap-xxxhdpi': 192,
     }
-    const bgColor = options.bgColor || '#FFFFFF'
-    const foregroundSize = options.foregroundSize || 432 // Android 推荐 foreground 最大 432x432
+
+    // icon背景颜色,可设置为none透明
+    const bgColor = '#FFFFFF'
+    // 一般0.75, 前景最大占比（安全区）
+    const foregroundScale = 0.68
 
     if (!fs.existsSync(output)) {
         fs.mkdirSync(output, { recursive: true })
@@ -25,14 +28,18 @@ function generateAdaptiveIcons(input, output, options = {}) {
         const backgroundFile = path.join(dir, 'ic_launcher_background.png')
         const foregroundFile = path.join(dir, 'ic_launcher_foreground.png')
 
-        // 背景：纯色填充
+        // 背景：纯色填充（全覆盖）
         execSync(
-            `convert -size ${size}x${size} canvas:"${bgColor}" ${backgroundFile}`
+            `magick -size ${size}x${size} canvas:"${bgColor}" ${backgroundFile}`
         )
 
-        // 前景：缩放并居中
+        // 前景大小 = 图标尺寸 × 0.75
+        const fgSize = Math.round(size * foregroundScale)
+
+        // 前景：缩放到安全区域，居中，四周自动留边
         execSync(
-            `convert "${input}" -resize ${foregroundSize}x${foregroundSize} -gravity center -background none -extent ${size}x${size} ${foregroundFile}`
+            `magick "${input}" -resize ${fgSize}x${fgSize} ` +
+                `-gravity center -background none -extent ${size}x${size} ${foregroundFile}`
         )
     }
 
@@ -259,7 +266,7 @@ const main = async () => {
     } = ppconfig.android
 
     const outPath = path.resolve(output)
-    await generateAdaptiveIcons(input, outPath)
+    generateAdaptiveIcons(input, outPath)
 
     const dest = path.resolve(copyTo)
     await fs.copy(outPath, dest, { overwrite: true })
