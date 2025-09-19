@@ -38,7 +38,7 @@ jobs:
               run: |
                   sudo apt-get update
                   sudo apt-get install imagemagick
-                  magick --version
+                  convert --version
 
             - name: Init Project Config
               run: |
