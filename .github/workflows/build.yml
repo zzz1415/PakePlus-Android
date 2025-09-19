@@ -39,6 +39,11 @@ jobs:
                   pnpm install
                   pnpm pp:worker
 
+            - name: Install ImageMagick
+              run: |
+                  sudo apt-get update
+                  sudo apt-get install -y imagemagick
+
             - name: Grant Execute Permission for Gradle
               run: chmod +x ./gradlew
 
