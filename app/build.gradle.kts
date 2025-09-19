@@ -20,7 +20,6 @@ android {
         debug {
             isMinifyEnabled = true
             isShrinkResources = true
-            isZipAlignEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
