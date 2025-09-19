@@ -28,9 +28,9 @@ function generateAdaptiveIcons(input, output) {
         const backgroundFile = path.join(dir, 'ic_launcher_background.png')
         const foregroundFile = path.join(dir, 'ic_launcher_foreground.png')
 
-        // 背景：纯色填充（全覆盖）
+        // linux只能convert， 背景：纯色填充（全覆盖）
         execSync(
-            `magick -size ${size}x${size} canvas:"${bgColor}" ${backgroundFile}`
+            `convert -size ${size}x${size} canvas:"${bgColor}" ${backgroundFile}`
         )
 
         // 前景大小 = 图标尺寸 × 0.75
@@ -38,7 +38,7 @@ function generateAdaptiveIcons(input, output) {
 
         // 前景：缩放到安全区域，居中，四周自动留边
         execSync(
-            `magick "${input}" -resize ${fgSize}x${fgSize} ` +
+            `convert "${input}" -resize ${fgSize}x${fgSize} ` +
                 `-gravity center -background none -extent ${size}x${size} ${foregroundFile}`
         )
     }
