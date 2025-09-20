@@ -1,71 +1,30 @@
-name: Android Build
+name: Build unsigned APK
 
 on:
-    workflow_dispatch:
-    # push:
-    #     branches:
-    #         - 'main'
+    push:
+        branches:
+            - main
+    pull_request:
 
 jobs:
     build:
-        name: Build APK
         runs-on: ubuntu-latest
+
         steps:
-            - name: Checkout Repository
-              uses: actions/checkout@v4
+            - name: Checkout code
+              uses: actions/checkout@v5
 
             - name: Set up JDK 17
-              uses: actions/setup-java@v3
+              uses: actions/setup-java@v4
               with:
-                  distribution: 'temurin'
                   java-version: '17'
-                  cache: gradle
+                  distribution: 'temurin'
 
-            - name: Set up Android SDK
-              uses: android-actions/setup-android@v3
-
-            - uses: pnpm/action-setup@v3
-              with:
-                  version: latest
-
-            - name: Sync node version and setup cache
-              uses: actions/setup-node@v4
-              with:
-                  node-version: 20
-                  cache: pnpm
-
-            - name: Install ImageMagick
-              run: |
-                  sudo apt-get update
-                  sudo apt-get install imagemagick
-                  convert --version
-
-            - name: Init Project Config
-              run: |
-                  pnpm install
-                  pnpm pp:worker
-
-            - name: Grant Execute Permission for Gradle
-              run: chmod +x ./gradlew
-
-            - name: Build Debug APK
+            - name: Build unsigned APK
               run: ./gradlew assembleDebug
 
-            - name: Rename APK file
-              run: |
-                  cd app/build/outputs/apk/debug/
-                  mv app-debug.apk ${{ env.NAME }}-v${{ env.VERSION }}.apk
-
-            - name: Create GitHub Release
-              uses: softprops/action-gh-release@v1
+            - name: Upload APK artifact
+              uses: actions/upload-artifact@v4
               with:
-                  files: app/build/outputs/apk/debug/*.apk
-                  tag_name: '${{ env.NAME }}'
-                  name: '${{ env.NAME }} v${{ env.VERSION }}'
-                  body: '${{ env.PUBBODY }}'
-                  draft: false
-              env:
-                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-                  NAME: ${{ env.NAME }}
-                  VERSION: ${{ env.VERSION }}
-                  PUBBODY: ${{ env.PUBBODY }}
+                  name: app-debug-unsigned-apk
+                  path: app/build/outputs/apk/debug/app-debug.apk
