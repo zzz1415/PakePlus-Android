@@ -36,7 +36,8 @@ jobs:
 
             - name: Install ImageMagick
               run: |
-                  sudo apt-get update && sudo apt-get install imagemagick --no-install-recommends
+                  sudo apt-get update
+                  sudo apt-get install imagemagick --no-install-recommends
                   convert --version
 
             - name: Init Project Config
