@@ -34,8 +34,10 @@ jobs:
                   node-version: 20
                   cache: pnpm
 
-            - name: Check ImageMagick
-              run: convert --version
+            - name: Install ImageMagick
+              run: |
+                  sudo apt-get update && sudo apt-get install imagemagick --no-install-recommends
+                  convert --version
 
             - name: Init Project Config
               run: |
